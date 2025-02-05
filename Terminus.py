@@ -158,12 +158,17 @@ print('Welcome to Terminus.py')
 message.append(input('Enter "Help" to get a list of commands'))
 
 
-
+found = False
 #inf while loop
 while X == 1:
     for x in Terminal.Commands:
-        if message[currentMessage] == x:
-            if message[currentMessage] == 'shop':
+        if message[currentMessage].lower() == x:
+            found = True
+            if message[currentMessage].lower() == 'shop':
                 Terminal.useCommand(Terminal,x,Shop)
             else:
                 Terminal.useCommand(Terminal,x)
+    if found != True:
+        NewMessage("Error : Command Not Found. Please try again or enter 'help' to see a list of commands")
+    else:
+        found = False
