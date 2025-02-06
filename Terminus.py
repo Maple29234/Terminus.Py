@@ -18,9 +18,9 @@ class Shop:
     class Items:
         #items
         Items = {
-        "1": "CoinsModifier+=.1",
-        "2": "CoinsGainIncrease",
-        "3": "CoinsModifier+=.5"
+            "1": "CoinsModifier+=.1",
+            "2": "CoinsGainIncrease",
+            "3": "CoinsModifier+=.5"
         }
         
         #prices
@@ -159,20 +159,35 @@ class terminal:
     def addCommand(self,CommandName,Command):
         self.Commands.update({CommandName : Command})
 
-
+class fish:
+    def __init__(self,name, desc, price, chance):
+        self.name = name
+        self.desc = desc
+        self.price = price
+        self.chance = chance #Out of 100
+    
+    def catchafish(self):
+        global Coins
+        didyacatchit = randomnumbah(1, 100)
+        if didyacatchit >= 0 and didyacatchit <= self.chance:
+            print("You caught a " + self.name + "!")
+            Coins += self.price
+            terminal.NewMessage("'" + self.desc + "'")
+        else:
+            terminal.NewMessage('You caught nothing, you are a failure') #Sadge :(
 
 def randomnumbah(min,max):
     return math.floor(random.random() * (max - min + 1) + min);
 
 
 def greetMessage():
-    if (randomnumbah(0, 10000) == 1):
+    if randomnumbah(0, 10000) == 1:
         return("Unwelcome to AntiTerminus.")
         
-    elif (tDate.month == 1 and tDate.day == 1): 
+    elif tDate.month == 1 and tDate.day == 1: 
         return("Happy New Year! Welcome to Terminus.py")
         
-    elif (tDate.month == 2 and tDate.day == 4):
+    elif tDate.month == 2 and tDate.day == 4:
         return("It's Terminus.py anniversary! Welcome!")
         
     return("Welcome to Terminus.py")
@@ -206,16 +221,36 @@ def MineCommand():
 
 
 
-terminal.addCommand(terminal,"mine",MineCommand)
-terminal.addCommand(terminal,"shop",Shop.init)
-terminal.addCommand(terminal,"help",HelpCommand)
-
-
-
 shop = Shop()
 shopItems = shop.Items()
 shopFunctions = shopItems.Functions
 found = False
+
+shark = fish("Shark", "An endangered sand tiger shark, you are now in jail for killing an endangered species",500,1)
+salmon = fish("Salmon", "A sillier lil fish",30,45)
+cod = fish("Cod", "A silly lil fish", 25, 50)
+def catchmeafish():
+    fishIndex = {
+        '1' : cod,
+        '2' : salmon,
+        '3' : cod,
+        '4' : salmon,
+        '5' : cod,
+        '6' : cod,
+        '7' : salmon,
+        '8' : cod,
+        '9' : salmon,
+        '10' : shark
+        
+    }
+    tempVar = randomnumbah(1,10)
+    fishIndex[str(tempVar)].catchafish() #Add your own fish.catchafish here! without it the fish no catchy watchy with this function
+terminal.addCommand(terminal,"catchmeafish",catchmeafish)
+#:3 :3
+
+terminal.addCommand(terminal,"mine",MineCommand)
+terminal.addCommand(terminal,"shop",Shop.init)
+terminal.addCommand(terminal,"help",HelpCommand)
 
 
 
@@ -224,8 +259,6 @@ startMessage()
 #inf while loop
 while X == 1:
     for x in terminal.Commands:
-        print(message)
-        print(currentMessage)
         if message[currentMessage].lower() == x:
             found = True
             if message[currentMessage].lower() == 'shop':
