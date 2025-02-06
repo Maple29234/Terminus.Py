@@ -13,5 +13,6 @@ Run on your local machine by downloading the repo.
 
 
 # OFFICIAL LINKS
-Original creator's page
+## https://github.com/Maple29234/Terminus.Py
+Original JS version : 
 ## https://rando-idiot.github.io/Terminus
