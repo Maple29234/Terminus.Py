@@ -1,6 +1,5 @@
 # Terminus.py
-A somewhat small incremental game played in a web "terminal".
-
+A somewhat small incremental game played in a python terminal.
 # __HOW TO PLAY__
 Run on your local machine by downloading the repo.
 
