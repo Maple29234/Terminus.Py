@@ -144,7 +144,7 @@ class terminal:
     def NewMessage(Message):
         global message, currentMessage
         currentMessage+=1
-        message.append(input(Message))
+        message.append(input(Message+"\n"))
     
     Commands = {
         
