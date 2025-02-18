@@ -3,117 +3,139 @@ from datetime import date
 import math
 import random
 
-#Coin Variables
+#game stuff
 class game:
-    maxBattery = 15.00
-    powerModifier = 1.00    
-    power = 50
-    powerGain = 1
-    powerUsed = 0
-    rechargerate = 1
-
+    power = 0
+    maxbattery = 15.00
+    pointsModifier = 1.00    
+    points = 111111
+    pointsGain = 1
+    pointsUsed = 0
+    rechargeRate = 1
+    upgStage = 0
+    expToLevel = 0
+    class unlocks:
+        begin = False
+        index = False
+        doctype = False
+        configyml = False
+        infShop = False
+    
 #Shop
 class Shop: 
     class Items:
-        #items
-        Items = {
-            "1": "powerModifier+=.1",
-            "2": "powerGainIncrease",
-            "3": "powerModifier+=.5"
-        }
         
         #prices
         Prices = {
             '1' : 5,
-            '2' : 8,
-            '3' : 20
+            '2' : 20,
+            '3' : 50,
+            '4' : 100
+        }
+        
+        
+        #items
+        Items = {
+            "1": "begin: .........The beginning",
+            "2": "index: ........index.html",
+            "3": "doctype: ......<!DOCTYPE HTML>",
+            "4": "configyml: ...config.yml"
         }
         
         #functions
         class Functions:
+            def thingThatWillProbBeRemoved(self,x):
+                itemsBoughtCounter = 0
+                itemsNotBoughtCounter = 0
+                self.ItemsBought[x]+=1
+                print(f'thing{x}')
+                for i in self.ItemsBought:
+                    if self.ItemsBought[i] == 1:
+                        itemsBoughtCounter+=1
+                    else:
+                        itemsNotBoughtCounter+=1
+                if itemsBoughtCounter == len(self.ItemsBought) and itemsNotBoughtCounter == 0:
+                    terminal.log(terminal,"Inf shop unlocked")
+                    game.unlocks.InfShop = True
+
+                
             ItemsBought2 = {
                 '1' : 0,
                 '2' : 0,
-                '3' : 0
+                '3' : 0,
+                '4' : 0
             }
             ItemsBought = {
                 '1' : 0,
                 '2' : 0,
-                '3' : 0
+                '3' : 0,
+                '4' : 0
             }
             
             def Item1(self,Shop):
-                if game.power < Shop.Items.Prices['1']:
+                if game.points < Shop.Items.Prices['1']:
                     terminal.log(terminal,"Not enough money")
                     return
-
-                self.ItemsBought2['1']+=1
-                self.ItemsBought['1']+=1
+                if self.ItemsBought['1'] == 1:
+                    terminal.log(terminal,"Already bought")
+                    return
+                self.thingThatWillProbBeRemoved(self,'1')
                 
-                game.power-=Shop.Items.Prices['1']
-                game.powerModifier+=.1
-                
-                if self.ItemsBought['1'] >= 10:
-                    if game.power != 0:
-                        Shop.Items.Prices['1'] += round(game.power * Decimal(.1))
-                    else:
-                        Shop.Items.Prices['1'] += round(Shop.Items.Prices['1'] * .1)
-                    self.ItemsBought['1'] = 0
-                    
+                game.points-=Shop.Items.Prices['1']
+                game.pointsModifier+=.1
                     
                 print("Purchase complete")
-                terminal.log(terminal,'Total power : ' + str(game.power))
-
+                terminal.log(terminal,'Total points : ' + str(game.points))
                 
             def Item2(self,Shop):
 
-                if game.power < Shop.Items.Prices['2']:
+                if game.points < Shop.Items.Prices['2']:
                     terminal.log(terminal,"Not enough money")
                     return
                 
-                self.ItemsBought2['2']+=1
-                self.ItemsBought['2']+=1
+                if self.ItemsBought['2'] == 1:
+                    terminal.log(terminal,"Already bought")
+                    return
                 
-                game.power-=Shop.Items.Prices['2']
-                game.powerGain+=1
+                self.thingThatWillProbBeRemoved(self,'2')
+                
+                game.points-=Shop.Items.Prices['2']
+                game.pointsGain+=1
                     
 
-                if self.ItemsBought['2'] >= 3:
-                    
-                    if game.power != 0:
-                        Shop.Items.Prices['2'] += round(game.power * Decimal(.1))
-                    else:
-                        Shop.Items.Prices['2'] += round(Shop.Items.Prices * .1)
-                    self.ItemsBought['2'] = 0 
-                    
                 print("Purchase complete")
-                terminal.log(terminal,'Total power : ' + str(game.power))
+                terminal.log(terminal,'Total points : ' + str(game.points))
                 
             def Item3(self,Shop):
-                if game.power < Shop.Items.Prices['3']:
+                if game.points < Shop.Items.Prices['3']:
                     terminal.log(terminal,"Not enough money")
                     return
-                self.ItemsBought2['3']+=1
                 
-                self.ItemsBought['3']+=1
-                game.power-=Shop.Items.Prices['3']
-                game.powerModifier+=0.5
+                if self.ItemsBought['3'] == 1:
+                    terminal.log(terminal,"Already bought")
+                    return
+                
+                self.thingThatWillProbBeRemoved(self,'3')
 
-                if self.ItemsBought['3'] >= 1:
-                    print("S")
-                    if game.power > 8:
-                        Shop.Items.Prices['3'] += round(game.power)
-                    else:
-                        Shop.Items.Prices['3'] += round(Shop.Items.Prices * .25)
-                    self.ItemsBought['3'] = 0 
-
+                game.points-=Shop.Items.Prices['3']
+                game.pointsModifier+=0.5
                 print("Purchase complete")
-                terminal.log(terminal,'Total power : ' + str(game.power))
-                
+                terminal.log(terminal,'Total points : ' + str(game.points))
+            
+            def Item4(self,Shop):
+                if Shop.Items.Prices['4'] > game.points:
+                    terminal.log(terminal,"Not enough money")
+                    return
+                if self.ItemsBought['4'] == 1:
+                    terminal.log(terminal,"Already bought")
+                    return
+                self.thingThatWillProbBeRemoved(self,'4')
+                terminal.log(terminal,"Bought")
             functionDict = {
                 '1' : Item1,
                 '2' : Item2,
-                '3' : Item3
+                '3' : Item3,
+                '4' : Item4
             }
             
     def init(self):
@@ -122,7 +144,7 @@ class Shop:
         print("--------------------------------- Shop ---------------------------------")
         
         for x,y in self.Items.Items.items():
-            print("Item "+ x + " : "+ y+" | Price : "+ str(self.Items.Prices[x])+" | Amount Bought : " + str(self.Items.Functions.ItemsBought2[x]))
+            print(f"Item {x} :  {y} | Price :  {str(self.Items.Prices[x])}")# | Amount Bought : " + str(self.Items.Functions.ItemsBought2[x]))
         
         print(str(len(self.Items.Items)+1) + " : Cancel")
         terminal.log(terminal,"Which item would you like to buy? (Requires Integer)")
@@ -130,6 +152,7 @@ class Shop:
         for x,y in self.Items.Functions.functionDict.items():
             
             if terminal.message[terminal.currentMessage] == x:
+                
                 self.Items.Functions.functionDict[x](self.Items.Functions,self)
             
             elif terminal.message[terminal.currentMessage] == str(len(self.Items.Items)+1):
@@ -142,11 +165,12 @@ class terminal:
     message = []
     currentMessage = -1
     tDate = date.today() 
+    helpList = ["Help - Brings up this page","Shop - Brings up the shop",'Mine - Increase money']
 
     #log
     def log(self,Message):
         self.currentMessage+=1
-        self.message.append(input(Message+"\n"))
+        self.message.append(input(f"{Message}\n"))
     
     #Commands
     Commands = {
@@ -205,30 +229,31 @@ class terminal:
     #Help Command
     def HelpCommand():
         print("Commands : ")
-        print("Help - Brings up this page")
-        print("Shop - Brings up the shop")
-        terminal.log(terminal,'Mine - Increase money')  
+        for i in terminal.helpList:
+            if i == terminal.helpList[len(terminal.helpList)-1]:
+                terminal.log(terminal,i)
+            print(i)  
 
     #Mine Command  
     def MineCommand():
 
-        #Increase powerModifier when youve used Mine ten times
-        if game.powerUsed+1 >= 10:
-            game.powerUsed = 0 
-            game.powerModifier += .1
+        #Increase pointsModifier when youve used Mine ten times
+        if game.pointsUsed+1 >= 10:
+            game.pointsUsed = 0 
+            game.pointsModifier += .1
         
-        powerGained = Decimal(str(game.powerGain * game.powerModifier)).quantize(Decimal('.01'), rounding=ROUND_UP) #Multiply powerGain and powerModifier then round it up
-        game.power += powerGained # add the power gained
-        game.powerUsed+=1 # increase powerUsed
+        pointsGained = Decimal(str(game.pointsGain * game.pointsModifier)).quantize(Decimal('.01'), rounding=ROUND_UP) #Multiply pointsGain and pointsModifier then round it up
+        game.points += pointsGained # add the points gained
+        game.pointsUsed+=1 # increase pointsUsed
         
-        #Print powerGained and power
-        print('Gained ' + str(powerGained) + ' power')
-        terminal.log(terminal,'You now have ' + str(game.power) + ' power')
+        #Print pointsGained and points
+        print(f'Gained {str(pointsGained)} points')
+        terminal.log(terminal,f'You now have {str(game.points)} points')
     
     #Charge Command
     def Charge():
             if game.power < game.maxbattery:
-                game.power = game.power + game.rechargerate
+                game.power = game.power + game.rechargeRate
                 # Leaving cooldown out for  now dont feel like doing it
                 # game.chargeCooldown = true
                 #setTimeout(() => {
@@ -236,7 +261,25 @@ class terminal:
                 #, 3000); // 5 seconds cooldown
             elif game.power == game.maxbattery: 
                 return terminal.log("Full charge.")
-                terminal.log("Current battery: " + game.power)
+                terminal.log(f"Current battery: {game.power}")
+    
+    def balance():
+        terminal.log(f"Your current balance is {game.points} points.")
+    def update():
+        if (game.power <= 0):
+            game.xp = game.xp + 10;
+            terminal.log("Gained 10 exp.")
+            if (game.xp == game.expToLevel):
+                game.skillpoints = game.skillpoints + 1
+                terminal.log("Leveled up!")
+            
+            return
+        
+
+        game.powerpoints = game.power / game.antipower
+        game.power -= 1
+
+        game.pointcalc()
 
 #Fiiiish
 class fish:
@@ -249,9 +292,9 @@ class fish:
     def catchafish(self):
         didyacatchit = helpers.randomnumbah(1, 100)
         if didyacatchit >= 0 and didyacatchit <= self.chance:
-            print("You caught a " + self.name + "!")
-            game.power += self.price
-            terminal.log(terminal,"'" + self.desc + "'")
+            print(f"You caught a {self.name}!")
+            game.points += self.price
+            terminal.log(terminal,f"'{self.desc}'")
         else:
             terminal.log(terminal,'You caught nothing, you are a failure') #Sadge :(
 
@@ -277,7 +320,7 @@ terminal.addCommand(terminal,"charge",terminal.Charge)
 terminal.startMessage()
 
 #inf while loop
-while "Astolfo Pores":
+while "fiiiiiiiiiiiiiiiish":
     for x in terminal.Commands:
         if terminal.message[terminal.currentMessage].lower() == x:
             terminal.found = True
@@ -286,6 +329,6 @@ while "Astolfo Pores":
             else:
                 terminal.useCommand(terminal,x)
     if terminal.found != True:
-        terminal.log(terminal,"Error : Command Not Found. Please try again or enter 'help' to see a list of commands")
+        terminal.log(terminal,f"Error : '{terminal.message[terminal.currentMessage].lower()}' not defined. Please try again or enter 'help' to see a list of commands")
     else:
         terminal.found = False
