@@ -4,9 +4,8 @@ A somewhat small incremental game played in a python terminal.
 Run on your local machine by downloading the repo.
 
 ## Running locally:
-
-   Install Terminus.py file
-   \nRun it
+   1. Install python if you do not have it 
+   2. Install Terminus.py file then run it
 
 # __DISCORD__
 **https://discord.gg/kYyEQ2hjPs**
