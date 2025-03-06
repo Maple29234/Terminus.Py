@@ -1,31 +1,27 @@
 from decimal import Decimal, ROUND_UP
 from datetime import date 
 import random
+import ast
 
 class Game:
     def __init__(self):
         self.power = 0.00
         self.maxbattery = 15.00
         self.powerModifier = 1.00    
-        self.points = 175
+        self.points = 123123
         self.powerGain = 1
         self.chargeUsed = 0  
         self.rechargeRate = 1
         self.upgStage = 0
         self.xp = 0
         self.expToLevel = 100
-        
-        #self.skillpoints =0 
-        
-class Unlocks:
-    def __init__(self):
         self.varDict = {
             'begin' : False,
             'index' : False,
             'doctype' : False,
             'configyml' : False
         }
-        infShop = False
+        self.infShop = False
     def checker(self,var):
         self.varDict[var] = True
         foo = 0
@@ -33,8 +29,10 @@ class Unlocks:
             if x == True:
                 foo +=1
         if foo == 4:
-            infShop = True
+            self.infShop = True
             terminal.log("Inf shop unlocked")
+        
+        
 
 class Terminal:
     def __init__(self):
@@ -44,7 +42,7 @@ class Terminal:
         self.message = []
         self.currentMessage = -1
         self.tDate = date.today() 
-        self.helpStr = "Help - Brings this up\nShop - Brings up the shop\nCharge - Increase power\nUpdate - Convert power into points\nBalance - Prints your point balance"
+        self.helpStr = "Help - Brings this up\nShop - Brings up the shop\nCharge - Increase power\nUpdate - Convert power into points\nBalance - Prints your point balance\nGithub - Shows the github repo link\nCredits - Shows the credits\nDiscord - Gives a link to the terminus discord\nSave - Saves your game. MAKE SURE TO SAVE\nLoad - Loads your most recent save"
         self.commands = {}
         
         self.shark = self.fish("Shark", "An endangered sand tiger shark, you are now in jail for killing an endangered species",500,1)
@@ -54,9 +52,13 @@ class Terminal:
         self.addCommand("charge",self.Charge)
         self.addCommand("update",self.update)
         self.addCommand("balance",self.balance)
-        self.addCommand("debug", lambda : breakpoint())
         self.addCommand("catchmeafish",self.catchmeafish)
         self.addCommand("help",self.help)
+        self.addCommand("github",self.github)
+        self.addCommand("credits",self.credits)
+        self.addCommand("discord",self.discord)
+        self.addCommand("save",self.save)
+        self.addCommand("load",self.load)
 
     def log(self,Message):
         #logs a new input in message
@@ -146,7 +148,7 @@ class Terminal:
         
         def catchafish(self):
             didyacatchit = random.randrange(1, 100)
-            if didyacatchit >= 0 and didyacatchit <= self.chance:
+            if didyacatchit <= self.chance:
                 print(f"You caught a {self.name}!")
                 game.points += self.price
                 terminal.log(f"'{self.desc}'")
@@ -169,6 +171,36 @@ class Terminal:
         }
         tempVar = random.randrange(1,10)
         fishIndex[str(tempVar)].catchafish() #Add your own fish.catchafish here! without it the fish no catchy watchy with this function :3
+    def credits(self):
+        terminal.log("Developer - @Maple531 on discord \n Fork of @Rando-Idiot's Terminus")
+    def discord(self):
+        terminal.log("You can find me and other people who either hate this game or enjoy it here: https://discord.gg/kYyEQ2hjPs")
+    def github(self):
+        terminal.log("https://github.com/Maple29234/Terminus.Py/tree/main")
+    def save(self):
+        vars = {
+            'power' : game.power,
+            'points' : game.points,
+            'maxbattery' : game.maxbattery,
+            'powerModifier' : game.powerModifier,
+            'powerGain' : game.powerGain,
+            'rechargeRate' : game.rechargeRate,
+            'upgStage' : game.upgStage,
+            'xp' : game.xp,
+            'expToLevel' : game.expToLevel,
+            'varDict' : game.varDict,
+            'infShop' : game.infShop
+            
+            }
+        with open('save.txt','w') as f:
+            f.write(str(vars))
+        terminal.log("Saved")
+    def load(self):
+        with open('save.txt','r') as f:
+            vars = ast.literal_eval(f.read())
+        for x in vars:
+            setattr(game,x,vars[x])
+        terminal.log("Loaded")
     
 
 class Item:
@@ -176,16 +208,14 @@ class Item:
         self.name = name # initialize these members in this class, not another one!
         self.price = price
         tempName = name.split(':')[0].lower()
-        if tempName in unlocks.varDict:
-            self.bought = unlocks.varDict[tempName]
+        if tempName in game.varDict:
+            self.bought = game.varDict[tempName]
 
     def buy(self, game) -> bool:
         if game.points < self.price: 
             terminal.log("Not enough points") 
             return False 
-        if not hasattr(self,'bought'):
-            pass
-        elif self.bought:
+        if self.bought:
             terminal.log("Already bought")
             return False
         
@@ -213,7 +243,7 @@ class ItemInit(Item): #I really dont know what to name this :/
         if success:
             vars = self.func(game) # gets vars from lambda
             setattr(game,vars[0],vars[1]) #changes the variables specified by the lambda
-            unlocks.checker(vars[2]) #sets the bought variable of the item specified by lambda
+            game.checker(vars[2]) #sets the bought variable of the item specified by lambda
 
         return success
 
@@ -246,7 +276,6 @@ class Shop:
         checker(terminal.message[terminal.currentMessage])
 
 game = Game()
-unlocks = Unlocks()
 shop = Shop({
     '1' : ItemInit(5,"Begin: The Beginning",lambda game: ['powerModifier',game.powerModifier+.1,'Begin']),
     '2' : ItemInit(20,"Index: Index.html",lambda game: ['powerGain',game.powerGain+1,'Index']),
