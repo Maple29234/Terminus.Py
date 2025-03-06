@@ -156,21 +156,8 @@ class Terminal:
                 terminal.log('You caught nothing, you are a failure') #Sadge :(
     #Fish command
     def catchmeafish(self):
-        fishIndex = {
-            '1' : self.cod,
-            '2' : self.salmon,
-            '3' : self.cod,
-            '4' : self.salmon,
-            '5' : self.cod,
-            '6' : self.cod,
-            '7' : self.salmon,
-            '8' : self.cod,
-            '9' : self.salmon,
-            '10' : self.shark
-            
-        }
-        tempVar = random.randrange(1,10)
-        fishIndex[str(tempVar)].catchafish() #Add your own fish.catchafish here! without it the fish no catchy watchy with this function :3
+        fishIndex = [self.cod,self.salmon,self.cod,self.salmon,self.cod,self.cod,self.salmon,self.cod,self.salmon,self.shark]
+        random.choice(fishIndex).catchafish() #Add your own fish.catchafish here! without it the fish no catchy watchy with this function :3
     def credits(self):
         terminal.log("Developer - @Maple531 on discord \n Fork of @Rando-Idiot's Terminus")
     def discord(self):
