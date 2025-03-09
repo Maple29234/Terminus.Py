@@ -5,7 +5,8 @@ Run on your local machine by downloading the repo.
 
 ## Running locally:
    1. Install python if you do not have it 
-   2. Install Terminus.py file then run it
+   2. Install the repo using your preferred way of downloading
+   3. Run it
 
 # __DISCORD__
 **https://discord.gg/kYyEQ2hjPs**
