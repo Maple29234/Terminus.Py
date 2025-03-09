@@ -5,12 +5,16 @@ import ast
 
 class Game:
     def __init__(self):
+        self.infShop1Price = 500 #increase maxBattery
+        self.infShop2Price = 1000 #increase rechargeRate
+        self.infShop3Price = 2000 #increase basePointsGain
+        self.infShop4Price = 3000 #increase pointsModifier
         self.power = 0.00
-        self.maxbattery = 15.00
-        self.powerModifier = 1.00    
-        self.points = 123123
-        self.powerGain = 1
-        self.chargeUsed = 0  
+        self.maxBattery = 15.00
+        self.pointsModifier = 1.00
+        self.points = 0
+        self.basePointsGain = 1
+        self.updateUsed = 0
         self.rechargeRate = 1
         self.upgStage = 0
         self.xp = 0
@@ -22,17 +26,26 @@ class Game:
             'configyml' : False
         }
         self.infShop = False
-    def checker(self,var):
+    def updateInfShopPrices(self):
+        i = 0
+        for x in infShop.items.values():
+            i+=1
+            x.price = getattr(self, f"infShop{str(i)}Price")
+
+    def infShopChecker(self, var):
+
         self.varDict[var] = True
         foo = 0
         for x in self.varDict.values():
-            if x == True:
+            if x:
                 foo +=1
         if foo == 4:
             self.infShop = True
-            terminal.log("Inf shop unlocked")
-        
-        
+            terminal.addCommand("infshop",infShop.shopCommand)
+            terminal.helpStr += "\nInfshop - Shows infinitely purchasable items."
+            print("You've unlocked the inf shop. Check 'help' for details.")
+
+
 
 class Terminal:
     def __init__(self):
@@ -42,7 +55,7 @@ class Terminal:
         self.message = []
         self.currentMessage = -1
         self.tDate = date.today() 
-        self.helpStr = "Help - Brings this up\nShop - Brings up the shop\nCharge - Increase power\nUpdate - Convert power into points\nBalance - Prints your point balance\nGithub - Shows the github repo link\nCredits - Shows the credits\nDiscord - Gives a link to the terminus discord\nSave - Saves your game. MAKE SURE TO SAVE\nLoad - Loads your most recent save"
+        self.helpStr = "Help - Brings this up\nTutorial - Brings up a tutorial\nShop - Brings up the shop\nCharge - Increase power\nUpdate - Convert power into points\nBalance - Prints your point balance\nGithub - Shows the github repo link\nCredits - Shows the credits\nDiscord - Gives a link to the terminus discord\nSave - Saves your game. MAKE SURE TO SAVE\nLoad - Loads your most recent save"
         self.commands = {}
         
         self.shark = self.fish("Shark", "An endangered sand tiger shark, you are now in jail for killing an endangered species",500,1)
@@ -59,6 +72,8 @@ class Terminal:
         self.addCommand("discord",self.discord)
         self.addCommand("save",self.save)
         self.addCommand("load",self.load)
+        #self.addCommand("debug",lambda:breakpoint()) #for debugging
+        self.addCommand("tutorial",self.tutorial)
 
     def log(self,Message):
         #logs a new input in message
@@ -78,7 +93,7 @@ class Terminal:
             print("It's Terminus.py anniversary! Welcome!")
             
         print("Welcome to Terminus.py")
-        terminal.log("You can type 'help' to see available commands")
+        terminal.log("You can type 'help' to see available commands. Type 'tutorial' to see a tutorial. Use 'save' to save and 'load' to load your most recent save")
     
     #Commands
     
@@ -96,12 +111,12 @@ class Terminal:
             self.log(f"Error : '{message}' not defined. Please try again or enter 'help' to see a list of commands")
 
     #Use Command
-    def useCommand(self,Name):
-        self.commands[Name]()#Check if Arg was used
+    def useCommand(self,name):
+        self.commands[name]()#Check if Arg was used
 
     #Add Command
-    def addCommand(self,CommandName : str,Command):
-        self.commands.update({CommandName : Command})#Add line to Commands
+    def addCommand(self,commandName : str,command):
+        self.commands.update({commandName : command})#Add line to Commands
 
     #help command
     def help(self):
@@ -109,35 +124,27 @@ class Terminal:
     
     #Charge Command
     def Charge(self):
-        #increase power
-        #Increase powerModifier when youve used Mine ten times
-        
-            
-        powerGained = Decimal(str(game.powerGain * game.powerModifier)).quantize(Decimal('.01'), rounding=ROUND_UP) #Multiply powerGain and powerModifier then round it up
-        game.power = Decimal(game.power) + powerGained # add the points gained
-        game.chargeUsed+=1 # increase chargeUsed
-        if game.chargeUsed >= 10:
-            game.chargeUsed = 0 
-            game.powerModifier += .1
-        if game.power >= game.maxbattery: 
-            game.power = game.maxbattery
+        game.power += game.rechargeRate
+        if game.power >= game.maxBattery:
+            game.power = game.maxBattery
             return self.log(f"Full charge. \n Battery : {game.power}")
-        self.log(f"Gained {str(powerGained)} power\nCurrent battery: {game.power}")
+        self.log(f"Gained {str(game.rechargeRate)} power\nCurrent battery: {game.power}")
     
-    #balance command      
+    #balance command
     def balance(self):
-        terminal.log(f"Your current balance is {game.points} points.")
-        
+        self.log(f"Your current balance is {game.points} points.")
+
     #update command
     def update(self):
-        #Increase powerModifier when youve used Mine ten times
-        if game.chargeUsed+1 >= 10:
-            game.chargeUsed = 0 
-            game.powerModifier += .1
-        
-        game.points += game.power
-        terminal.log(f'Gained {str(game.power)} points\nYou now have {str(game.points)} points')
+        pointsGained = Decimal(str(game.power * (game.pointsModifier + game.basePointsGain))).quantize(Decimal('.01'), rounding=ROUND_UP) #Add power then multiply BasePointsGain and pointsModifier then round it up
         game.power = 0
+        game.updateUsed+=1 # increase chargeUsed
+        if game.updateUsed >= 10:
+            game.updateUsed = 0
+            game.pointsModifier += .1
+        
+        game.points += pointsGained
+        self.log(f'Gained {str(pointsGained)} points\nYou now have {str(game.points)} points')
     #Fiiiish
     class fish:
         def __init__(self,name : str, desc : str, price : int, chance : int):
@@ -159,36 +166,47 @@ class Terminal:
         fishIndex = [self.cod,self.salmon,self.cod,self.salmon,self.cod,self.cod,self.salmon,self.cod,self.salmon,self.shark]
         random.choice(fishIndex).catchafish() #Add your own fish.catchafish here! without it the fish no catchy watchy with this function :3
     def credits(self):
-        terminal.log("Developer - @Maple531 on discord \n Fork of @Rando-Idiot's Terminus")
+        self.log("Developer - @Maple531 on discord \n Fork of @Rando-Idiot's Terminus")
     def discord(self):
-        terminal.log("You can find me and other people who either hate this game or enjoy it here: https://discord.gg/kYyEQ2hjPs")
+        self.log("You can find me and other people who either hate this game or enjoy it here: https://discord.gg/kYyEQ2hjPs")
     def github(self):
-        terminal.log("https://github.com/Maple29234/Terminus.Py/tree/main")
+        self.log("https://github.com/Maple29234/Terminus.Py/tree/main")
     def save(self):
         vars = {
-            'power' : game.power,
-            'points' : game.points,
-            'maxbattery' : game.maxbattery,
-            'powerModifier' : game.powerModifier,
-            'powerGain' : game.powerGain,
-            'rechargeRate' : game.rechargeRate,
-            'upgStage' : game.upgStage,
-            'xp' : game.xp,
-            'expToLevel' : game.expToLevel,
-            'varDict' : game.varDict,
-            'infShop' : game.infShop
-            
-            }
-        with open('save.txt','w') as f:
+            "power" : game.power,
+            "points" : str(game.points),
+            "maxbattery" : game.maxBattery,
+            "powerModifier" : game.pointsModifier,
+            "powerGain" : game.basePointsGain,
+            "rechargeRate" : game.rechargeRate,
+            "upgStage" : game.upgStage,
+            "xp" : game.xp,
+            "expToLevel" : game.expToLevel,
+            "varDict" : game.varDict,
+            "infShop" : game.infShop,
+            "infShop1Price" : game.infShop1Price,
+            "infShop2Price": game.infShop2Price,
+            "infShop3Price": game.infShop3Price,
+            "infShop4Price": game.infShop4Price
+        }
+        with open('save.json', 'w') as f:
             f.write(str(vars))
-        terminal.log("Saved")
+        self.log("Saved")
     def load(self):
-        with open('save.txt','r') as f:
+        with open('save.json', 'r') as f:
             vars = ast.literal_eval(f.read())
         for x in vars:
+            if x == "points":
+                setattr(game,x,Decimal(vars[x]))
+                continue
             setattr(game,x,vars[x])
-        terminal.log("Loaded")
-    
+        if game.infShop:
+            self.addCommand("infshop", infShop.shopCommand)
+            self.helpStr += "\nInfshop - Shows infinitely purchasable items."
+        game.updateInfShopPrices()
+        self.log("Loaded")
+    def tutorial(self):
+        self.log("1. Use 'charge' to gain power\n2. After you've gotten max power (or just whenever) sell your power by using 'update'\n3. Check shop and buy stuff by using 'shop'\n4. Use 'save' to save and 'load' to load your most recent save")
 
 class Item:
     def __init__(self, name: str, price: int | float): 
@@ -198,21 +216,22 @@ class Item:
         if tempName in game.varDict:
             self.bought = game.varDict[tempName]
 
-    def buy(self, game) -> bool:
+    def buy(self) -> bool:
         if game.points < self.price: 
             terminal.log("Not enough points") 
             return False 
-        if self.bought:
-            terminal.log("Already bought")
-            return False
+        if hasattr(self,'bought'):
+            if self.bought:
+                terminal.log("Already bought")
+                return False
         
-        game.points -= self.price 
+        game.points -= Decimal(self.price)
         if hasattr(self, 'bought'):
             self.bought = True 
         terminal.log(f"Bought {self.name}\nTotal points left: {game.points}")
         return True
 
-class ItemInit(Item): #I really dont know what to name this :/
+class ItemInit(Item): #I really don't know what to name this :/
     def __init__(self,price : int | float, name : str, boughtfunc):
         """_summary_
 
@@ -225,36 +244,39 @@ class ItemInit(Item): #I really dont know what to name this :/
         self.name = name
         self.func = boughtfunc
         super().__init__(self.name,self.price)
-    def buy(self,game) -> bool:
-        success = super().buy(game) #calls Item.buy()
+    def buy(self) -> bool:
+        success = super().buy() #calls Item.buy()
         if success:
-            vars = self.func(game) # gets vars from lambda
-            setattr(game,vars[0],vars[1]) #changes the variables specified by the lambda
-            game.checker(vars[2]) #sets the bought variable of the item specified by lambda
+            lambdaVars = self.func(self) # gets vars from lambda
+            setattr(game, lambdaVars[0], lambdaVars[1]) #changes the variables specified by the lambda
+            game.infShopChecker(lambdaVars[2]) #sets the bought variable of the item specified by lambda
+            if len(lambdaVars) > 3:
+                setattr(lambdaVars[3],lambdaVars[4],lambdaVars[5]) # for infShop's prices to increase as you buy stuff
+                setattr(game,lambdaVars[6],lambdaVars[7]) #this is probably a terrible way to do it isnt it? eh im sure its fine
 
         return success
 
 class Shop:
-    def __init__(self, items : dict[Item]):
+    def __init__(self, items : dict[str,ItemInit]):
         self.items = items
-    
-    def buy(self, item_name: str, game):
-        return self.items[item_name].buy(game)
+    def buy(self, item_name: str):
+        return self.items[item_name].buy()
 
     def shopCommand(self):
         def checker(message : str):
-#                if not message.isdigit():
-#                    terminal.log(f"Error : Requires 'int' got 'str'.")
                 try:
-                    self.buy(message, game)
+                    self.buy(message)
                     return
                 except KeyError:
                     terminal.log(f"Error : Item '{message}' not found. Check list of items by doing 'shop'.")
-        #end ofchecker
+        #end of checker
         message = terminal.message[terminal.currentMessage].lower().split()
         if len(message) == 2:
             return checker(message[1])
         i=1
+
+
+
         for x in self.items.values():
             print(f'{i} : {x.name} | Price : {x.price}')
             i+=1
@@ -264,10 +286,17 @@ class Shop:
 
 game = Game()
 shop = Shop({
-    '1' : ItemInit(5,"Begin: The Beginning",lambda game: ['powerModifier',game.powerModifier+.1,'Begin']),
-    '2' : ItemInit(20,"Index: Index.html",lambda game: ['powerGain',game.powerGain+1,'Index']),
-    '3' : ItemInit(50,"Doctype: <!DOCTYPE HTML>",lambda game: ['powerModifier',game.powerModifier+.5,'Doctype']),
-    '4' : ItemInit(100,"Configyml: config.yml", lambda game: ['powerModifier',game.powerModifier+1, 'Configyml'])
+    '1' : ItemInit(5,"Begin: The Beginning", lambda self: ['basePointsGain', game.basePointsGain + 10, 'Begin']),
+    '2' : ItemInit(20,"Index: Index.html", lambda self: ['pointsModifier', game.pointsModifier + .5, 'Index']),
+    '3' : ItemInit(50,"Doctype: <!DOCTYPE HTML>", lambda self: ['pointsModifier', game.pointsModifier + .5, 'Doctype']),
+    '4' : ItemInit(100,"Configyml: config.yml", lambda self: ['basePointsGain', game.basePointsGain*2, 'Configyml'])
+})
+infShop = Shop({
+    '1' : ItemInit(game.infShop1Price,"Increase maxBattery", lambda self: ['maxBattery', game.maxBattery*1.5,'maxBattery',self,"price",round(self.price*1.2),"infShop1Price",game.infShop1Price*1.2]),
+    '2' : ItemInit(game.infShop2Price,"Increase rechargeRate", lambda self: ['rechargeRate', game.rechargeRate*2,'rechargeRate',self,"price",round(self.price*1.2),"infShop2Price",game.infShop2Price*1.2]),
+    '3' : ItemInit(game.infShop3Price,"Increase basePointsGain", lambda self: ['basePointsGain', game.basePointsGain*1.5,'basePointsGain',self,"price",round(self.price*1.2),"infShop3Price",game.infShop3Price*1.2]),
+    '4': ItemInit(game.infShop4Price, "Increase pointsModifier",lambda self: ['pointsModifier',game.pointsModifier*1.1,'pointsModifier',self,"price",round(self.price * 1.2), "infShop4Price", game.infShop4Price*1.2]),
+
 })
 terminal = Terminal()
 
