@@ -2,6 +2,8 @@
 A somewhat small incremental game played in a python terminal.
 # __HOW TO PLAY__
 Run on your local machine by downloading the repo.
+Use 'tutorial' to see a tutorial 
+Use 'help' to see the list of commands
 
 ## Running locally:
    1. Install python if you do not have it 
