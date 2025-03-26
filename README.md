@@ -1,3 +1,5 @@
+# Terminal version, if you would like to switch to non-terminal version go to main branch
+
 # Terminus.py
 A somewhat small incremental game played in a python terminal.
 # __HOW TO PLAY__
