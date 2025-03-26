@@ -2,6 +2,17 @@ from decimal import Decimal, ROUND_UP
 from datetime import date 
 import random
 import ast
+import pygame
+pygame.init()
+
+displayInfo = pygame.display.Info()
+width = displayInfo.current_w
+height = displayInfo.current_h
+screen = pygame.display.set_mode((width,height))
+clock = pygame.time.Clock()
+running = True
+pygame.freetype.init()
+defaultFont = pygame.freetype.Font("./Fonts/MainFont.ttf",12)
 
 class Game:
     def __init__(self):
@@ -43,16 +54,17 @@ class Game:
             self.infShop = True
             terminal.addCommand("infshop",infShop.shopCommand)
             terminal.helpStr += "\nInfshop - Shows infinitely purchasable items."
-            print("You've unlocked the inf shop. Check 'help' for details.")
+            terminal.log("You've unlocked the inf shop. Check 'help' for details.")
 
 
 
 class Terminal:
     def __init__(self):
         #declare variables and add commands
-        
+        self.foo = False
+        self.drawList = []
         self.found = False
-        self.message = []
+        self.message = [""]
         self.currentMessage = -1
         self.tDate = date.today() 
         self.helpStr = "Help - Brings this up\nTutorial - Brings up a tutorial\nShop - Brings up the shop\nCharge - Increase power\nUpdate - Convert power into points\nBalance - Prints your point balance\nGithub - Shows the github repo link\nCredits - Shows the credits\nDiscord - Gives a link to the terminus discord\nSave - Saves your game. MAKE SURE TO SAVE\nLoad - Loads your most recent save"
@@ -75,35 +87,72 @@ class Terminal:
         #self.addCommand("debug",lambda:breakpoint()) #for debugging
         self.addCommand("tutorial",self.tutorial)
 
-    def log(self,Message):
+    def waitUntilInput(self):
+        global running
+        while running:
+
+            if self.message[0] == "" or self.message[0] == " ":
+                self.message[0] = "_"
+            screen.fill((34, 34, 34))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.TEXTINPUT:
+                    if self.message[0] == "_":
+                        self.message[0] = ""
+                    self.message[0] += event.text
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        self.message[0] = self.message[0][:-1]
+                    elif event.key == pygame.K_RETURN:
+                        foo = self.message[0]
+                        self.message[0] = ""
+                        return foo
+            pygame.draw.rect(screen, (72, 68, 68), ((9, height - 33), (width - 18, 16)), 0, 1)
+
+            terminal.draw()
+            defaultFont.render_to(screen, (9, height - 29), terminal.message[0], (255, 255, 255))
+            pygame.display.flip()
+
+
+
+
+    def draw(self):
+        for func in self.drawList:
+            func()
+    @staticmethod
+    def log(message):
         #logs a new input in message
-        self.currentMessage+=1
-        self.message.append(input(f"{Message}\n"))
+        #self.currentMessage+=1
+        #self.message.append(input(f"{Message}\n"))
+        message = message.split("\n")
+        for v in message:
+            NewMessage(v).addToDraw()
 
     def startMessage(self):
         #first message with easter eggs
         tDate = self.tDate
         if random.randrange(0, 10000) == random.randrange(0,100):
-            print("Unwelcome to AntiTerminus.")
-            
-        elif tDate.month == 1 and tDate.day == 1: 
-            print("Happy New Year! Welcome to Terminus.py")
-                
+            terminal.log("Unwelcome to AntiTerminus.")
+
+        elif tDate.month == 1 and tDate.day == 1:
+            terminal.log("Happy New Year! Welcome to Terminus.py")
+
         elif tDate.month == 2 and tDate.day == 4:
-            print("It's Terminus.py anniversary! Welcome!")
-            
-        print("Welcome to Terminus.py")
+            terminal.log("It's Terminus.py anniversary! Welcome!")
+
+        terminal.log("Welcome to Terminus.py")
         terminal.log("You can type 'help' to see available commands. Type 'tutorial' to see a tutorial. Use 'save' to save and 'load' to load your most recent save")
-    
+
     #Commands
-    
+
     #Next Command
-    def nextCommand(self):
+    def nextCommand(self,command):
         #checks command list for message, if message is not in commmand list then log an error
         try:
-            message = self.message[self.currentMessage].lower().split()[0]
+            message = command.lower().split()[0]
         except IndexError:
-            self.log(f"Error : '{self.message[self.currentMessage]}' not defined. Please try again or enter 'help' to see a list of commands")
+            self.log(f"Error : '{command}' not defined. Please try again or enter 'help' to see a list of commands")
             return
         if message in self.commands:
             self.useCommand(message)
@@ -121,7 +170,7 @@ class Terminal:
     #help command
     def help(self):
         terminal.log(self.helpStr)
-    
+
     #Charge Command
     def Charge(self):
         game.power += game.rechargeRate
@@ -129,7 +178,7 @@ class Terminal:
             game.power = game.maxBattery
             return self.log(f"Full charge. \n Battery : {game.power}")
         self.log(f"Gained {str(game.rechargeRate)} power\nCurrent battery: {game.power}")
-    
+
     #balance command
     def balance(self):
         self.log(f"Your current balance is {game.points} points.")
@@ -142,7 +191,7 @@ class Terminal:
         if game.updateUsed >= 10:
             game.updateUsed = 0
             game.pointsModifier += .1
-        
+
         game.points += pointsGained
         self.log(f'Gained {str(pointsGained)} points\nYou now have {str(game.points)} points')
     #Fiiiish
@@ -152,11 +201,11 @@ class Terminal:
             self.desc = desc
             self.price = price
             self.chance = chance #Out of 100
-        
+
         def catchafish(self):
             didyacatchit = random.randrange(1, 100)
             if didyacatchit <= self.chance:
-                print(f"You caught a {self.name}!")
+                terminal.log(f"You caught a {self.name}!")
                 game.points += self.price
                 terminal.log(f"'{self.desc}'")
             else:
@@ -209,7 +258,7 @@ class Terminal:
         self.log("1. Use 'charge' to gain power\n2. After you've gotten max power (or just whenever) sell your power by using 'update'\n3. Check shop and buy stuff by using 'shop'\n4. Use 'save' to save and 'load' to load your most recent save")
 
 class Item:
-    def __init__(self, name: str, price: int | float): 
+    def __init__(self, name: str, price: int | float):
         self.name = name # initialize these members in this class, not another one!
         self.price = price
         tempName = name.split(':')[0].lower()
@@ -217,17 +266,17 @@ class Item:
             self.bought = game.varDict[tempName]
 
     def buy(self) -> bool:
-        if game.points < self.price: 
-            terminal.log("Not enough points") 
-            return False 
+        if game.points < self.price:
+            terminal.log("Not enough points")
+            return False
         if hasattr(self,'bought'):
             if self.bought:
                 terminal.log("Already bought")
                 return False
-        
+
         game.points -= Decimal(self.price)
         if hasattr(self, 'bought'):
-            self.bought = True 
+            self.bought = True
         terminal.log(f"Bought {self.name}\nTotal points left: {game.points}")
         return True
 
@@ -278,11 +327,12 @@ class Shop:
 
 
         for x in self.items.values():
-            print(f'{i} : {x.name} | Price : {x.price}')
+            terminal.log(f'{i} : {x.name} | Price : {x.price}')
             i+=1
-    
+
         terminal.log("What would you like to buy? (Use Int)")
-        checker(terminal.message[terminal.currentMessage])
+        terminal.message[0] = ""
+        checker(terminal.waitUntilInput())
 
 game = Game()
 shop = Shop({
@@ -300,7 +350,46 @@ infShop = Shop({
 })
 terminal = Terminal()
 
+class NewMessage:
+    messageYList = [height-54]
+    messageAmount = 0
+    def __init__(self,text):
+        if NewMessage.messageAmount == 0:
+              self.foo = NewMessage.messageAmount
+              NewMessage.messageYList.insert(0,NewMessage.messageYList[0]-21)
+        else:
+            self.foo = NewMessage.messageAmount
+            NewMessage.messageYList.insert(0,NewMessage.messageYList[0]-21)
+        NewMessage.messageAmount+=1
+        self.text = text
+    def draw(self):
+        pygame.draw.rect(screen,(72, 68, 68),((9,NewMessage.messageYList[self.foo]),(width-18, 16)),0,1)
+        defaultFont.render_to(screen,(9,NewMessage.messageYList[self.foo]+4),self.text,(255,255,255))
+    def addToDraw(self):
+        terminal.drawList.append(self.draw)
 
+screen.fill((34, 34, 34))
 terminal.startMessage()
-while True:
-    terminal.nextCommand()
+while running:
+    if terminal.message[0] == "" or terminal.message[0] == " ":
+        terminal.message[0] = "_"
+    screen.fill((34, 34, 34))
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.TEXTINPUT:
+            if terminal.message[0] == "_":
+                terminal.message[0] = ""
+            terminal.message[0] += event.text
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                terminal.message[0] = terminal.message[0][:-1]
+            elif event.key == pygame.K_RETURN:
+                terminal.nextCommand(terminal.message[0])
+                terminal.message[0] = ""
+
+    pygame.draw.rect(screen,(72, 68, 68),((9,height-33),(width-18,16)),0,1)
+
+    terminal.draw()
+    defaultFont.render_to(screen,(9,height-29),terminal.message[0],(255,255,255))
+    pygame.display.flip()
