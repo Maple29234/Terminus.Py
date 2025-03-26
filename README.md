@@ -1,4 +1,4 @@
-#Non-terminal version
+# Non-terminal version
 
 # Terminus.py
 A somewhat small incremental game played in a python terminal.
