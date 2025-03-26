@@ -1,3 +1,5 @@
+#Non-terminal version
+
 # Terminus.py
 A somewhat small incremental game played in a python terminal.
 # __HOW TO PLAY__
