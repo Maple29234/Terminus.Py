@@ -215,9 +215,9 @@ class Terminal:
         fishIndex = [self.cod,self.salmon,self.cod,self.salmon,self.cod,self.cod,self.salmon,self.cod,self.salmon,self.shark]
         random.choice(fishIndex).catchafish() #Add your own fish.catchafish here! without it the fish no catchy watchy with this function :3
     def credits(self):
-        self.log("Developer - @Maple531 on discord \n Fork of @Rando-Idiot's Terminus")
+        self.log("Developer - @Maple531 on discord \n Python port of @Rando-Idiot's now deleted Terminus")
     def discord(self):
-        self.log("You can find me and other people who either hate this game or enjoy it here: https://discord.gg/kYyEQ2hjPs")
+        self.log("No discord currently")
     def github(self):
         self.log("https://github.com/Maple29234/Terminus.Py/tree/main")
     def save(self):
