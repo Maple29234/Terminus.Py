@@ -20,5 +20,4 @@ Use 'help' to see the list of commands
 
 # OFFICIAL LINKS
 ## https://github.com/Maple29234/Terminus.Py
-Original JS(Now lua) version : 
-## https://github.com/rando-idiot/Terminus
+The original version has been deleted and I cannot link it
